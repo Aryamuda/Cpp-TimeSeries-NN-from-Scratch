@@ -1,4 +1,4 @@
-# Neural Network from Scratch in Cpp  
+# Cpp-TimeSeries-NN-from-Scratch
 > Implements backpropagation, mini-batch SGD, dropout, and Min-Max normalization 
 > purely in C++. Trained on EUR/USD and XAU/USD price data.
 
