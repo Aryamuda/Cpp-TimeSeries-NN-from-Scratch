@@ -1,4 +1,6 @@
-# Predicting Close Price Using NN  
+# Neural Network from Scratch in Cpp  
+> Implements backpropagation, mini-batch SGD, dropout, and Min-Max normalization 
+> purely in C++. Trained on EUR/USD and XAU/USD price data.
 
 ## Overview
 
