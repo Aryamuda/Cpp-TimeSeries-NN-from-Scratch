@@ -1,5 +1,5 @@
-#ifndef BATCH_NORM_LAYER_HPP
-#define BATCH_NORM_LAYER_HPP
+#ifndef LAYER_NORM_LAYER_HPP
+#define LAYER_NORM_LAYER_HPP
 
 #include <vector>
 #include <string>
@@ -9,7 +9,7 @@
 
 namespace Predicting_Close_Price_Using_NN {
 
-    class BatchNormLayer {
+    class LayerNormLayer {
     public:
         int num_features_; // Number of features/neurons in the input to this layer
         double epsilon_;   // Small constant for numerical stability (to avoid division by zero)
@@ -24,17 +24,15 @@ namespace Predicting_Close_Price_Using_NN {
         std::vector<double> running_var_;
 
         // Cache for backward pass (for a single instance/sample)
-        std::vector<double> x_input_cache_;      // Input to this BN layer (A from previous layer)
+        std::vector<double> x_input_cache_;      // Input to this layer (A from previous layer)
         std::vector<double> x_normalized_cache_; // x_input_cache_ after normalization, before gamma/beta
         double mean_cache_;          // Mean of x_input_cache_ for the current instance
         double variance_cache_;      // Variance of x_input_cache_ for the current instance
-                                     // Note: For true Batch Norm, mean/var would be vectors (per feature across batch)
-                                     // Here, for LayerNorm style, they are scalars (across features of one instance)
 
         bool initialized_running_stats_; // Flag to track if running stats have been initialized from first batch
 
 
-        BatchNormLayer(int num_features, double epsilon = 1e-5, double momentum = 0.9);
+        LayerNormLayer(int num_features, double epsilon = 1e-5, double momentum = 0.9);
 
         std::vector<double> forward(const std::vector<double>& x_input_sample, bool training_mode);
 

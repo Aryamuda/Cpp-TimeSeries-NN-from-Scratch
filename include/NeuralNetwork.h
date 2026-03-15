@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include "Layer.h"
 #include "Loss.h"
-#include "BatchNormLayer.h"
+#include "LayerNormLayer.h"
 
 namespace Predicting_Close_Price_Using_NN {
 
@@ -22,7 +22,7 @@ namespace Predicting_Close_Price_Using_NN {
     public:
         // --- Member Variables ---
         std::vector<Layer> layers_;
-        std::vector<BatchNormLayer> bn_layers_;
+        std::vector<LayerNormLayer> bn_layers_;
         std::vector<bool> use_bn_for_layer_;
 
         double learning_rate_;
@@ -60,7 +60,9 @@ namespace Predicting_Close_Price_Using_NN {
                    size_t batch_size,
                    int print_every_n_epochs = 10,
                    const std::vector<std::vector<double>>& X_val = {},
-                   const std::vector<double>& y_val = {});
+                   const std::vector<double>& y_val = {},
+                   int early_stopping_patience = 0,
+                   double early_stopping_min_delta = 0.0);
 
         /**
          * @brief Evaluates the network's performance on a given dataset.

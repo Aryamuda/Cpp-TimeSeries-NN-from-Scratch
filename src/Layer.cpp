@@ -64,7 +64,8 @@ namespace Predicting_Close_Price_Using_NN {
             return;
         }
         double scale_factor = 1.0 / (1.0 - dropout_rate_);
-        static std::mt19937 random_engine(std::random_device{}());
+        // Fixed seed (42) for reproducibility - must match seed in Utils.cpp
+        static std::mt19937 random_engine(42);
         std::uniform_real_distribution<double> dist(0.0, 1.0);
 
         for (int i = 0; i < output_size_; ++i) {
@@ -127,26 +128,26 @@ namespace Predicting_Close_Price_Using_NN {
             delta_.resize(output_size_);
         }
 
-        if (activation_type_ == "relu") {
+        // Apply dropout mask to error from next layer BEFORE activation derivative
+        // This is the correct order: dropout masks the error signal before it propagates through the activation function
+        std::vector<double> masked_error = error_from_next_layer;
+        if (dropout_rate_ > 0.0) {
             for (int i = 0; i < output_size_; ++i) {
-                delta_[i] = error_from_next_layer[i] * Activations::relu_derivative(z_cache_[i]);
-            }
-        } else if (activation_type_ == "sigmoid") {
-            for (int i = 0; i < output_size_; ++i) {
-                delta_[i] = error_from_next_layer[i] * Activations::sigmoid_derivative(activation_cache_[i]);
-            }
-        } else if (activation_type_ == "linear") {
-            for (int i = 0; i < output_size_; ++i) {
-                delta_[i] = error_from_next_layer[i] * Activations::linear_derivative(z_cache_[i]);
+                masked_error[i] *= dropout_mask_[i];
             }
         }
 
-        // Apply dropout mask to deltas
-        if (dropout_rate_ > 0.0) {
-            // The dropout_mask_ must be the one from the corresponding forward pass.
-            // It's a member variable, so it should persist correctly between forward and backward for a given sample.
+        if (activation_type_ == "relu") {
             for (int i = 0; i < output_size_; ++i) {
-                delta_[i] *= dropout_mask_[i];
+                delta_[i] = masked_error[i] * Activations::relu_derivative(z_cache_[i]);
+            }
+        } else if (activation_type_ == "sigmoid") {
+            for (int i = 0; i < output_size_; ++i) {
+                delta_[i] = masked_error[i] * Activations::sigmoid_derivative(activation_cache_[i]);
+            }
+        } else if (activation_type_ == "linear") {
+            for (int i = 0; i < output_size_; ++i) {
+                delta_[i] = masked_error[i] * Activations::linear_derivative(z_cache_[i]);
             }
         }
 

@@ -5,7 +5,8 @@
 namespace Utils {
 
     double random_double(double min, double max) {
-        static std::mt19937 random_engine(std::random_device{}()); // Mersenne Twister engine seeded with a random device
+        // Fixed seed (42) for reproducibility - change this value to get different random results
+        static std::mt19937 random_engine(42);
         std::uniform_real_distribution<double> distribution(min, max);
         return distribution(random_engine);
     }
