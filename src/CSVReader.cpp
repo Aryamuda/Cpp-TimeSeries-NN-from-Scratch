@@ -59,10 +59,8 @@ namespace Predicting_Close_Price_Using_NN {
                     std::string trimmed_cell = trim_whitespace(cell);
                     if (!trimmed_cell.empty()) {
                         all_columns_in_row.push_back(std::stod(trimmed_cell));
-                    } else {
-
-                        all_columns_in_row.push_back(std::stod(trimmed_cell)); // This will throw for empty string
                     }
+                    // Empty cells are skipped (not added to the row)
                 } catch (const std::invalid_argument& ia) {
                     throw std::runtime_error("CSVReader Error: Invalid number format '" + cell +
                                              "' at line " + std::to_string(line_number) + " in file: " + filename);

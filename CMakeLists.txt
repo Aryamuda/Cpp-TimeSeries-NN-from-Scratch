@@ -16,8 +16,8 @@ add_executable(Predicting_Close_Price_Using_NN src/main.cpp
         src/NeuralNetwork.cpp
         include/CSVReader.h
         src/CSVReader.cpp
-        include/BatchNormLayer.h
-        src/BatchNormLayer.cpp
+        include/LayerNormLayer.h
+        src/LayerNormLayer.cpp
         include/BatchDataLoader.h
         src/BatchDataLoader.cpp)
 

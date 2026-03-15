@@ -1,83 +1,117 @@
-# Cpp-TimeSeries-NN-from-Scratch
-> Implements backpropagation, mini-batch SGD, dropout, and Min-Max normalization 
-> purely in C++. Trained on EUR/USD and XAU/USD price data.
+# Time-Series Neural Network from Scratch
+
+A production-grade neural network implementation built entirely in C++ for financial time-series prediction. This project demonstrates core deep learning concepts including backpropagation, optimization algorithms, and normalization techniques—implemented from first principles without external ML libraries.
 
 ## Overview
 
-Predicting Close Price Using NN is a C++ project that implements a neural network from scratch to predict financial asset prices based on time-series data. The current implementation is configured to read historical price data from a CSV file, train a neural network model, and evaluate its performance on a validation set.
+This project implements a fully-connected neural network for regression tasks on financial time-series data (e.g., EUR/USD, XAU/USD). It is designed to be lightweight, reproducible, and suitable for quantitative trading research.
 
-## Features
+## Key Features
 
-- **Neural Network Core in C++:** A lightweight, customizable neural network implemented purely in C++.
-- **Data Handling:** Includes a CSV reader to load and parse datasets.
-- **Data Preprocessing:** Implements Min-Max normalization for features and target variables.
-- **Time-Series Splitting:** Splits data into training and validation sets chronologically, which is crucial for time-series forecasting.
-- **Configurable Architecture:** Easily configure the neural network's layers, activation functions, and hyperparameters.
-- **Training & Evaluation:** The model is trained using a configurable number of epochs and evaluated using standard regression metrics (MSE, RMSE, MAE, R²).
-- **Prediction Output:** Saves the actual vs. predicted values for the validation set into a CSV file for further analysis.
+- **Custom Neural Network Core**: Full implementation of forward propagation, backpropagation, and gradient descent in pure C++
+- **Optimization**: Mini-batch SGD with Momentum and L2 weight decay
+- **Regularization**: Dropout and Layer Normalization
+- **Data Pipeline**: CSV parsing, Min-Max normalization, chronological time-series splits
+- **Early Stopping**: Configurable patience and minimum delta for validation-based early stopping
+- **Reproducibility**: Fixed random seed (42) for deterministic results
 
-## How It Works
+## Technical Implementation
 
-The main logic is orchestrated in the `run_main_training_pipeline` function:
+### Architecture
+- Fully-connected layers with configurable sizes
+- Activation functions: ReLU, Sigmoid, Linear
+- Layer Normalization (for hidden layers)
+- Output layer: Linear activation for regression
 
-1.  **Load Data:** Reads feature and target data from `EURUSD.csv`.
-2.  **Normalize Data:** Applies Min-Max scaling to all features and the target variable to scale them into a [0, 1] range.
-3.  **Split Data:** Performs a time-series split, allocating an initial portion of the data for training and the latter portion for validation (defaulting to a 80/20 split).
-4.  **Initialize Network:** Constructs a `NeuralNetwork` object with a defined architecture (e.g., input layer, hidden layers with ReLU, output layer with linear activation) and hyperparameters (learning rate, batch size, etc.).
-5.  **Train Model:** Trains the network on the normalized training data for a specified number of epochs.
-6.  **Evaluate Performance:** Calculates and displays regression metrics for both the training and validation sets on the normalized data.
-7.  **Save Predictions:** Generates predictions on the validation set, denormalizes them back to their original price scale, and saves them alongside the actual prices to `validation_predictions.csv`.
+### Training
+- Mini-batch Stochastic Gradient Descent
+- Momentum-based optimization
+- L2 regularization (weight decay)
+- Early stopping with validation monitoring
 
-## Getting Started
+### Metrics
+- Mean Squared Error (MSE)
+- Root Mean Squared Error (RMSE)
+- Mean Absolute Error (MAE)
+- R² (Coefficient of Determination)
 
-### Prerequisites
+## Building the Project
 
-- A C++ compiler that supports C++20.
-- CMake (version 3.10 or higher).
+```bash
+# Create build directory
+mkdir build && cd build
 
-### Building the Project
+# Configure with CMake
+cmake ..
 
-1.  Clone the repository:
-    ```bash
-    git clone https://github.com/Aryamuda/Predicting_Close_Price_Using_NN.git
-    cd Predicting_Close_Price_Using_NN
-    ```
+# Compile
+cmake --build . -j4
+```
 
-2.  Create a build directory and run CMake:
-    ```bash
-    mkdir build
-    cd build
-    cmake ..
-    ```
+## Running the Model
 
-3.  Compile the project:
-    ```bash
-    cmake --build .
-    ```
-
-### Running the Application
-
-1.  **Prepare Data:** Ensure you have a CSV file named `XAUUSD.csv` in the root directory of the project (or the execution directory). The file should contain numerical data where one column is the target variable (e.g., closing price) and the rest are features.
-
-2.  Run the executable from the build directory:
-    ```bash
-    ./Predicting_Close_Price_Using_NN
-    ```
+```bash
+# Execute from build directory
+./Predicting_Close_Price_Using_NN
+```
 
 ## Configuration
 
-The primary configuration is located within the `run_main_training_pipeline` function in `main.cpp`. You can adjust the following parameters:
+Modify the `run_main_training_pipeline` function in [`src/main.cpp`](src/main.cpp) to adjust:
 
--   **Dataset:** `input_csv_filename` and `target_column_idx`.
--   **Network Architecture:** `layer_sizes` and `activations`.
--   **Hyperparameters:** `learning_rate`, `num_epochs`, `batch_size`, `dropout_rate`, etc.
--   **Data Split:** `validation_split_ratio`.
+| Parameter | Description |
+|-----------|-------------|
+| `input_csv_filename` | Source data file (default: XAUUSD.csv) |
+| `target_column_idx` | Column index for target variable |
+| `layer_sizes` | Network architecture (e.g., {64, 32, 16, 1}) |
+| `activations` | Activation functions per layer |
+| `learning_rate` | Learning rate (default: 0.001) |
+| `num_epochs` | Training epochs |
+| `batch_size` | Mini-batch size |
+| `dropout_rate` | Dropout probability |
+| `momentum_coeff` | Momentum coefficient |
+| `weight_decay_coeff` | L2 regularization strength |
+| `early_stopping_patience` | Epochs to wait before early stop |
+| `validation_split_ratio` | Train/validation split (default: 0.2) |
+
+## Project Structure
+
+```
+.
+├── include/              # Header files
+│   ├── NeuralNetwork.h   # Core network implementation
+│   ├── Layer.h           # Layer definitions
+│   ├── LayerNormLayer.h  # Layer normalization
+│   ├── Activations.h     # Activation functions
+│   ├── Loss.h            # Loss functions
+│   └── CSVReader.h       # Data loading
+├── src/                  # Implementation files
+│   ├── main.cpp          # Training pipeline
+│   ├── NeuralNetwork.cpp
+│   ├── Layer.cpp
+│   └── ...
+├── CMakeLists.txt        # Build configuration
+└── *.csv                 # Data files
+```
 
 ## Output
 
--   **Console:** The program logs the entire process, including data loading, normalization, training progress, and final evaluation metrics.
--   **`validation_predictions.csv`:** A CSV file is generated with the following columns:
-    -   `ActualPrice`: The true, original price from the validation set.
-    -   `PredictedPrice_Denormalized`: The model's prediction, converted back to the original price scale.
-    -   `NormalizedPrediction`: The raw, normalized output from the network.
-    -   `NormalizedActual`: The normalized true value.
+The model generates:
+- **Console**: Training progress, epoch metrics (MSE, RMSE, MAE, R²)
+- **`validation_predictions.csv`**: Actual vs. predicted prices (both normalized and denormalized)
+
+## Requirements
+
+- C++20 compatible compiler (GCC 12+)
+- CMake 3.10+
+
+## Design Decisions for Quant Trading
+
+1. **Reproducibility**: Fixed random seed ensures consistent results across runs
+2. **Chronological Split**: Time-series data is split chronologically to prevent look-ahead bias
+3. **Layer Normalization**: Chosen over Batch Normalization for stability in small batch sizes
+4. **Early Stopping**: Prevents overfitting and reduces unnecessary computation
+
+## License
+
+MIT License

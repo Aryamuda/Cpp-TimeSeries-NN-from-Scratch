@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/arya/Cpp-TimeSeries-NN-from-Scratch/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

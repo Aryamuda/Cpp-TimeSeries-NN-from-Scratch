@@ -164,7 +164,9 @@ namespace Predicting_Close_Price_Using_NN {
         size_t batch_size,
         int print_every_n_epochs,
         const std::vector<std::vector<double>>& X_val,
-        const std::vector<double>& y_val) {
+        const std::vector<double>& y_val,
+        int early_stopping_patience,
+        double early_stopping_min_delta) {
 
         if (X_train.size() != y_train.size()) { throw std::invalid_argument("NN::train - X/y mismatch."); }
         if (X_train.empty()) { std::cout << "Warning: NN::train - empty training data." << std::endl; return; }
@@ -183,9 +185,16 @@ namespace Predicting_Close_Price_Using_NN {
         if (momentum_coeff_ > 0.0) std::cout << " - Momentum: " << momentum_coeff_ << std::endl;
         if (weight_decay_coeff_ > 0.0) std::cout << " - Weight Decay (L2): " << weight_decay_coeff_ << std::endl;
         bool bn_active = false; for(bool use_bn : use_bn_for_layer_) if(use_bn) bn_active = true;
-        if(bn_active) std::cout << " - Batch Normalization: Enabled for hidden layers" << std::endl;
+        if(bn_active) std::cout << " - Layer Normalization: Enabled for hidden layers" << std::endl;
+        if (early_stopping_patience > 0 && has_validation_data) {
+            std::cout << " - Early Stopping: Enabled (patience=" << early_stopping_patience << ", min_delta=" << early_stopping_min_delta << ")" << std::endl;
+        }
 
         BatchDataLoader data_loader(X_train, y_train, batch_size, false);
+
+        // Early stopping variables
+        double best_val_loss = std::numeric_limits<double>::max();
+        int epochs_without_improvement = 0;
 
         for (int epoch = 0; epoch < epochs; ++epoch) {
             data_loader.reset();
@@ -205,6 +214,25 @@ namespace Predicting_Close_Price_Using_NN {
                     apply_accumulated_gradients(current_X_batch.size());
                 }
             }
+
+            // Early stopping check
+            if (early_stopping_patience > 0 && has_validation_data && !X_val.empty()) {
+                RegressionMetrics val_metrics = evaluate_regression(X_val, y_val);
+                double current_val_loss = val_metrics.mse;
+
+                if (current_val_loss < best_val_loss - early_stopping_min_delta) {
+                    best_val_loss = current_val_loss;
+                    epochs_without_improvement = 0;
+                } else {
+                    epochs_without_improvement++;
+                }
+
+                if (epochs_without_improvement >= early_stopping_patience) {
+                    std::cout << "Early stopping triggered at epoch " << (epoch + 1) << " (no improvement for " << epochs_without_improvement << " epochs)" << std::endl;
+                    break;
+                }
+            }
+
             if (print_every_n_epochs > 0 && ((epoch + 1) % print_every_n_epochs == 0 || epoch == 0 || epoch == epochs - 1)) {
                 RegressionMetrics train_metrics = evaluate_regression(X_train, y_train);
                 std::cout << "Epoch " << std::setw(4) << (epoch + 1) << "/" << epochs
